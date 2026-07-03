@@ -1,0 +1,126 @@
+// RJS Coffee Shop — Job Application Portal
+// Prisma 7 schema. Client is generated to ../src/generated/prisma.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ── Admin users (staff who post jobs and review applicants) ──────────────
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+enum JobStatus {
+  DRAFT
+  OPEN
+  CLOSED
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CASUAL
+  INTERNSHIP
+}
+
+// ── A job posting ────────────────────────────────────────────────────────
+model Job {
+  id             String         @id @default(cuid())
+  title          String
+  slug           String         @unique
+  location       String         @default("Nairobi")
+  employmentType EmploymentType @default(FULL_TIME)
+  description    String // full job description (markdown/plain)
+  status         JobStatus      @default(DRAFT)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  questions    Question[]
+  applications Application[]
+}
+
+enum QuestionType {
+  SHORT_TEXT
+  LONG_TEXT
+  MULTIPLE_CHOICE
+  NUMBER
+}
+
+// ── A tailored screening question, with grading guidance for the AI ──────
+model Question {
+  id       String       @id @default(cuid())
+  jobId    String
+  job      Job          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  order    Int          @default(0)
+  text     String
+  type     QuestionType @default(LONG_TEXT)
+  options  String[] // for MULTIPLE_CHOICE
+  weight   Int          @default(10) // relative weight in overall grade
+  required Boolean      @default(true)
+  // What a strong answer looks like — fed to DeepSeek as the rubric.
+  gradingCriteria String @default("")
+
+  answers Answer[]
+
+  @@index([jobId])
+}
+
+enum ApplicationStatus {
+  NEW
+  GRADED
+  SHORTLISTED
+  REJECTED
+}
+
+// ── An applicant's submission for a job ──────────────────────────────────
+model Application {
+  id            String            @id @default(cuid())
+  jobId         String
+  job           Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  applicantName String
+  email         String
+  phone         String
+  coverNote     String            @default("")
+  status        ApplicationStatus @default(NEW)
+
+  // AI grading results
+  overallScore Int? // 0-100 weighted score
+  aiSummary    String  @default("") // short verdict from DeepSeek
+  aiStrengths  String[] // bullet strengths
+  aiConcerns   String[] // bullet concerns
+  graded       Boolean  @default(false)
+  gradeError   String   @default("") // populated if grading failed
+
+  createdAt DateTime @default(now())
+
+  answers Answer[]
+
+  @@index([jobId])
+  @@index([jobId, overallScore])
+}
+
+// ── An answer to one question within an application ──────────────────────
+model Answer {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  questionId    String
+  question      Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  value         String // the applicant's raw answer
+
+  // AI per-answer grading
+  score      Int? // 0-100 for this answer
+  reasoning  String @default("")
+
+  @@unique([applicationId, questionId])
+  @@index([applicationId])
+}

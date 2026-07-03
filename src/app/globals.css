@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+/* ── RJS Coffee Shop theme ──────────────────────────────────────────────
+   Warm espresso + cream palette. Light only for legibility. */
+@theme {
+  --color-cream: #f7f1e7;
+  --color-cream-100: #fbf7f0;
+  --color-espresso: #2b1d14;
+  --color-coffee: #4b3225;
+  --color-mocha: #6f4e37;
+  --color-caramel: #a9744f;
+  --color-latte: #c9a27e;
+  --color-accent: #b06a3b;
+  --color-accent-600: #96562d;
+  --color-ink: #241a13;
+  --color-muted: #7c6a5c;
+  --color-line: #e7ddd0;
+  --color-good: #2f7d54;
+  --color-warn: #b7791f;
+  --color-bad: #b4322c;
+
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), Georgia, serif;
+}
+
+:root {
+  --background: var(--color-cream);
+  --foreground: var(--color-ink);
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background:
+    radial-gradient(1200px 500px at 100% -10%, #efe3d2 0%, transparent 60%),
+    var(--color-cream);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Reusable bits */
+.card {
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(43, 29, 20, 0.04), 0 8px 24px -16px rgba(43, 29, 20, 0.25);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  padding: 0.625rem 1rem;
+  transition: background-color 0.15s ease, opacity 0.15s ease, transform 0.05s ease;
+  cursor: pointer;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-accent-600);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--color-coffee);
+  border: 1px solid var(--color-line);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--color-cream-100);
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  padding: 0.625rem 0.75rem;
+  color: var(--color-ink);
+  outline: none;
+}
+.input:focus,
+.textarea:focus,
+.select:focus {
+  border-color: var(--color-caramel);
+  box-shadow: 0 0 0 3px rgba(176, 106, 59, 0.15);
+}
+.label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-coffee);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+}
