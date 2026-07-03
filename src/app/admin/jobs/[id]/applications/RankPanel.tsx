@@ -23,7 +23,6 @@ export default function RankPanel({ jobId }: { jobId: string }) {
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <span className="text-2xl">🏆</span>
           <div>
             <h3 className="font-semibold text-espresso">AI shortlist</h3>
             <p className="text-sm text-muted">

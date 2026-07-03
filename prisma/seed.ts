@@ -31,7 +31,7 @@ async function main() {
         employmentType: 'FULL_TIME',
         status: 'OPEN',
         description:
-          'RJS Coffee Shop is hiring a friendly, detail-oriented Barista to craft great coffee and deliver warm customer service. Experience with espresso machines is a plus.',
+          "RJ's Coffee is hiring a friendly, detail-oriented Barista to craft great coffee and deliver warm customer service. Experience with espresso machines is a plus.",
         questions: {
           create: [
             {

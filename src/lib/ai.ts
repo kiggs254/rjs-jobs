@@ -75,7 +75,7 @@ export async function generateQuestions(input: {
   count?: number
 }): Promise<GeneratedQuestion[]> {
   const count = input.count ?? 5
-  const system = `You are a hiring assistant for RJS Coffee Shop, a café in Kenya.
+  const system = `You are a hiring assistant for RJ's Coffee, a café in Kenya.
 Given a job posting, produce ${count} tailored screening questions that reveal whether a candidate is a good fit.
 Mix question types. Prefer LONG_TEXT for judgment/experience questions, MULTIPLE_CHOICE for availability/preferences, NUMBER for years-of-experience style questions.
 For EVERY question, write a concise "gradingCriteria" rubric describing what a strong vs weak answer looks like — this will be used to auto-grade applicants.
@@ -122,7 +122,7 @@ export interface GradeInput {
 }
 
 export async function gradeApplication(input: GradeInput): Promise<GradeResult> {
-  const system = `You are a strict but fair hiring evaluator for RJS Coffee Shop.
+  const system = `You are a strict but fair hiring evaluator for RJ's Coffee.
 Grade the candidate's answers against each question's grading criteria and the job.
 Score each answer 0-100. Then compute an "overallScore" (0-100) as the WEIGHTED average using each question's weight.
 Be concrete and evidence-based in "reasoning". Keep "summary" to 1-2 sentences.
@@ -177,7 +177,7 @@ export interface RankInput {
 }
 
 export async function rankCandidates(input: RankInput): Promise<RankResult> {
-  const system = `You are a hiring manager for RJS Coffee Shop.
+  const system = `You are a hiring manager for RJ's Coffee.
 Given graded candidates for a role, rank them best-to-worst (rank 1 = best).
 For each, set "recommend" to SHORTLIST, MAYBE, or REJECT, with a one-line "note".
 Write a short overall "summary" naming your top pick(s) and why.

@@ -35,10 +35,16 @@ export async function applyAction(
   const email = String(formData.get('email') ?? '').trim().toLowerCase()
   const phone = String(formData.get('phone') ?? '').trim()
   const coverNote = String(formData.get('coverNote') ?? '').trim()
+  const resumeKey = String(formData.get('resumeKey') ?? '').trim()
+  const resumeName = String(formData.get('resumeName') ?? '').trim()
 
   if (!applicantName) return { error: 'Please enter your name.' }
   if (!EMAIL_RE.test(email)) return { error: 'Please enter a valid email address.' }
   if (!phone) return { error: 'Please enter your phone number.' }
+  // CV is required, and its key must look like one our upload route issued.
+  if (!resumeKey || !/^cvs\/[a-f0-9]+\.(pdf|doc|docx)$/.test(resumeKey)) {
+    return { error: 'Please upload your CV before submitting.' }
+  }
 
   // Collect + validate answers.
   const answers: { questionId: string; value: string }[] = []
@@ -57,6 +63,8 @@ export async function applyAction(
       email,
       phone,
       coverNote,
+      resumeKey,
+      resumeName,
       status: 'NEW',
       answers: { create: answers },
     },

@@ -18,16 +18,17 @@ export default async function HomePage() {
       <main className="flex-1">
         {/* Hero */}
         <section className="max-w-5xl mx-auto px-4 pt-16 pb-10 text-center">
-          <div className="text-5xl mb-4">☕</div>
+          <p className="script text-2xl mb-3">Ready &amp; Fresh</p>
           <h1
-            className="text-4xl sm:text-5xl font-bold text-espresso leading-tight"
+            className="text-4xl sm:text-5xl font-extrabold text-espresso leading-tight"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            Work at RJS Coffee Shop
+            Brew your career at{' '}
+            <span style={{ color: 'var(--color-brand-red)' }}>RJ&rsquo;s Coffee</span>
           </h1>
           <p className="text-lg text-muted mt-4 max-w-xl mx-auto">
-            We’re always looking for warm, dependable people who love great coffee and
-            great service. Find a role and apply in minutes.
+            We&rsquo;re always looking for warm, dependable people who love great coffee
+            and great service. Find a role and apply in minutes.
           </p>
           {jobs.length > 0 && (
             <a href="#openings" className="btn btn-primary mt-6">

@@ -52,6 +52,17 @@ export default async function ApplicationDetailPage({
               </a>{' '}
               · {app.phone}
             </p>
+            {app.resumeKey ? (
+              <a
+                href={`/admin/resume/${app.id}`}
+                className="btn btn-dark mt-3"
+                style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+              >
+                Download CV{app.resumeName ? ` (${app.resumeName})` : ''}
+              </a>
+            ) : (
+              <p className="text-xs text-muted mt-2">No CV uploaded.</p>
+            )}
           </div>
           <div className="text-right space-y-2">
             <div className="flex items-center gap-2 justify-end">

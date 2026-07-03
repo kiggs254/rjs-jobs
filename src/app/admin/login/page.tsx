@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
+import { Logo } from '@/components/Logo'
 import LoginForm from './LoginForm'
 
 export const metadata = { title: 'Admin sign in' }
@@ -16,15 +17,9 @@ export default async function LoginPage({
   return (
     <main className="flex-1 grid place-items-center px-4 py-16">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-6">
-          <div className="text-3xl mb-1">☕</div>
-          <h1
-            className="text-2xl font-bold text-espresso"
-            style={{ fontFamily: 'var(--font-display)' }}
-          >
-            RJS Coffee Shop
-          </h1>
-          <p className="text-muted text-sm">Hiring admin</p>
+        <div className="flex flex-col items-center mb-6">
+          <Logo href="/" size="md" tagline asLink={false} />
+          <p className="text-muted text-sm mt-3 font-semibold">Hiring admin</p>
         </div>
         <div className="card p-6">
           <LoginForm next={next ?? '/admin'} />

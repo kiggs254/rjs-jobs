@@ -1,30 +1,40 @@
 @import "tailwindcss";
 
-/* ── RJS Coffee Shop theme ──────────────────────────────────────────────
-   Warm espresso + cream palette. Light only for legibility. */
+/* ── RJ's Coffee brand theme ─────────────────────────────────────────────
+   From the logo: vivid RED, near-BLACK "COFFEE" tiles, WHITE, GREEN "Ready
+   & Fresh" script. Light UI. Token names kept for continuity; values are the
+   new brand palette. */
 @theme {
-  --color-cream: #f7f1e7;
-  --color-cream-100: #fbf7f0;
-  --color-espresso: #2b1d14;
-  --color-coffee: #4b3225;
-  --color-mocha: #6f4e37;
-  --color-caramel: #a9744f;
-  --color-latte: #c9a27e;
-  --color-accent: #b06a3b;
-  --color-accent-600: #96562d;
-  --color-ink: #241a13;
-  --color-muted: #7c6a5c;
-  --color-line: #e7ddd0;
-  --color-good: #2f7d54;
+  /* brand primitives */
+  --color-brand-red: #e4181c;
+  --color-brand-red-dark: #b4121a;
+  --color-brand-black: #161616;
+  --color-brand-green: #34a83b;
+
+  /* semantic tokens (re-mapped to brand) */
+  --color-cream: #f6f5f4;
+  --color-cream-100: #ffffff;
+  --color-espresso: #171717; /* headings / strongest text */
+  --color-coffee: #2b2b2b; /* body / secondary dark */
+  --color-mocha: #b4121a; /* deep red accents */
+  --color-caramel: #e4181c; /* focus */
+  --color-latte: #f2b1b3; /* soft red hover borders */
+  --color-accent: #e4181c; /* primary action / links */
+  --color-accent-600: #b4121a; /* hover */
+  --color-ink: #1a1a1a;
+  --color-muted: #6b7280;
+  --color-line: #e7e7ea;
+  --color-good: #2f9e44;
   --color-warn: #b7791f;
-  --color-bad: #b4322c;
+  --color-bad: #d1332e;
 
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display), Georgia, serif;
+  --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-script: var(--font-script), "Segoe Script", cursive;
 }
 
 :root {
-  --background: var(--color-cream);
+  --background: #ffffff;
   --foreground: var(--color-ink);
 }
 
@@ -34,8 +44,9 @@ html {
 
 body {
   background:
-    radial-gradient(1200px 500px at 100% -10%, #efe3d2 0%, transparent 60%),
-    var(--color-cream);
+    radial-gradient(900px 420px at 100% -8%, rgba(228, 24, 28, 0.06) 0%, transparent 62%),
+    radial-gradient(700px 380px at -5% 8%, rgba(52, 168, 59, 0.05) 0%, transparent 60%),
+    #ffffff;
   color: var(--foreground);
   font-family: var(--font-sans);
 }
@@ -45,7 +56,7 @@ body {
   background: #fff;
   border: 1px solid var(--color-line);
   border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(43, 29, 20, 0.04), 0 8px 24px -16px rgba(43, 29, 20, 0.25);
+  box-shadow: 0 1px 2px rgba(20, 20, 20, 0.04), 0 10px 28px -18px rgba(20, 20, 20, 0.28);
 }
 
 .btn {
@@ -54,9 +65,10 @@ body {
   justify-content: center;
   gap: 0.5rem;
   border-radius: 10px;
-  font-weight: 600;
+  font-weight: 700;
   padding: 0.625rem 1rem;
-  transition: background-color 0.15s ease, opacity 0.15s ease, transform 0.05s ease;
+  transition: background-color 0.15s ease, opacity 0.15s ease, transform 0.05s ease,
+    border-color 0.15s ease;
   cursor: pointer;
 }
 .btn:active {
@@ -67,11 +79,18 @@ body {
   cursor: not-allowed;
 }
 .btn-primary {
-  background: var(--color-accent);
+  background: var(--color-brand-red);
   color: #fff;
 }
 .btn-primary:hover:not(:disabled) {
-  background: var(--color-accent-600);
+  background: var(--color-brand-red-dark);
+}
+.btn-dark {
+  background: var(--color-brand-black);
+  color: #fff;
+}
+.btn-dark:hover:not(:disabled) {
+  background: #000;
 }
 .btn-ghost {
   background: transparent;
@@ -79,7 +98,8 @@ body {
   border: 1px solid var(--color-line);
 }
 .btn-ghost:hover:not(:disabled) {
-  background: var(--color-cream-100);
+  background: #faf9f9;
+  border-color: var(--color-latte);
 }
 
 .input,
@@ -96,13 +116,13 @@ body {
 .input:focus,
 .textarea:focus,
 .select:focus {
-  border-color: var(--color-caramel);
-  box-shadow: 0 0 0 3px rgba(176, 106, 59, 0.15);
+  border-color: var(--color-brand-red);
+  box-shadow: 0 0 0 3px rgba(228, 24, 28, 0.14);
 }
 .label {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.875rem;
-  color: var(--color-coffee);
+  color: var(--color-espresso);
 }
 
 .badge {
@@ -110,7 +130,14 @@ body {
   align-items: center;
   gap: 0.35rem;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
+}
+
+/* "Ready & Fresh" script mark */
+.script {
+  font-family: var(--font-script);
+  color: var(--color-brand-green);
+  font-weight: 400;
 }

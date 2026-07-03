@@ -92,6 +92,10 @@ model Application {
   coverNote     String            @default("")
   status        ApplicationStatus @default(NEW)
 
+  // CV / resume stored in Cloudflare R2 (private bucket; download via presigned URL)
+  resumeKey  String @default("")
+  resumeName String @default("")
+
   // AI grading results
   overallScore Int? // 0-100 weighted score
   aiSummary    String  @default("") // short verdict from DeepSeek

@@ -1,5 +1,3 @@
-import Link from 'next/link'
-
 export function ScoreBadge({ score }: { score: number | null | undefined }) {
   if (score == null)
     return (
@@ -62,11 +60,3 @@ export const QUESTION_TYPE_LABEL: Record<string, string> = {
   NUMBER: 'Number',
 }
 
-export function Logo({ href = '/' }: { href?: string }) {
-  return (
-    <Link href={href} className="flex items-center gap-2 font-bold text-espresso">
-      <span className="text-xl">☕</span>
-      <span style={{ fontFamily: 'var(--font-display)' }}>RJS Coffee Shop</span>
-    </Link>
-  )
-}

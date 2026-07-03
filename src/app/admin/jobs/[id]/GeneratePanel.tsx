@@ -18,7 +18,6 @@ export default function GeneratePanel({ jobId }: { jobId: string }) {
       style={{ background: 'var(--color-cream-100)', borderColor: 'var(--color-latte)' }}
     >
       <div className="flex items-start gap-3">
-        <span className="text-2xl">✨</span>
         <div className="flex-1">
           <h3 className="font-semibold text-espresso">Generate questions with AI</h3>
           <p className="text-sm text-muted">

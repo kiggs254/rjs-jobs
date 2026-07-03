@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { getSession } from '@/lib/auth'
 import { logoutAction } from './actions'
-import { Logo } from '@/components/ui'
+import { Logo } from '@/components/Logo'
 
 export default async function AdminLayout({
   children,

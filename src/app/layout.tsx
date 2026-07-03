@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Nunito_Sans, Fraunces } from "next/font/google";
+import { Nunito_Sans, Montserrat, Pacifico } from "next/font/google";
 import "./globals.css";
 
 const sans = Nunito_Sans({
@@ -7,19 +7,25 @@ const sans = Nunito_Sans({
   subsets: ["latin"],
 });
 
-const display = Fraunces({
+const display = Montserrat({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["600", "700", "800"],
+});
+
+const script = Pacifico({
+  variable: "--font-script",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "RJS Coffee Shop — Careers",
-    template: "%s · RJS Coffee Shop Careers",
+    default: "RJ's Coffee — Careers",
+    template: "%s · RJ's Coffee Careers",
   },
   description:
-    "Join the RJS Coffee Shop team. Browse open roles and apply in minutes.",
+    "Join the RJ's Coffee team — Ready & Fresh. Browse open roles and apply in minutes.",
   robots: { index: true, follow: true },
 };
 
@@ -31,7 +37,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sans.variable} ${display.variable} h-full antialiased`}
+      className={`${sans.variable} ${display.variable} ${script.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
