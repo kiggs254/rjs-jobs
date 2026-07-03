@@ -86,19 +86,26 @@ export function Logo({
   tagline?: boolean
   asLink?: boolean
 }) {
-  const [imgOk, setImgOk] = useState(true)
+  // Show the themed wordmark by default; upgrade to /logo.png ONLY once it
+  // actually loads. This avoids the browser's broken-image icon when the file
+  // is absent (onError can't be relied on — a 404 fires before hydration).
+  const [loaded, setLoaded] = useState(false)
   const px = H[size]
 
-  const inner = imgOk ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src="/logo.png"
-      alt="RJ's Coffee — Ready & Fresh"
-      style={{ height: px, width: 'auto' }}
-      onError={() => setImgOk(false)}
-    />
-  ) : (
-    <Wordmark size={px} tagline={tagline} />
+  const inner = (
+    <span className="inline-flex items-center">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/logo.png"
+        alt="RJ's Coffee — Ready & Fresh"
+        style={{ height: px, width: 'auto', display: loaded ? 'block' : 'none' }}
+        onLoad={(e) => {
+          if (e.currentTarget.naturalWidth > 1) setLoaded(true)
+        }}
+        onError={() => setLoaded(false)}
+      />
+      {!loaded && <Wordmark size={px} tagline={tagline} />}
+    </span>
   )
 
   if (!asLink) return <span className="inline-flex">{inner}</span>
