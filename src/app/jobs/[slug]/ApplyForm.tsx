@@ -94,7 +94,16 @@ export default function ApplyForm({
   const submittedCoverFile = coverMode === 'upload' ? coverFile : null
 
   return (
-    <form action={action}>
+    <form
+      action={action}
+      onKeyDown={(e) => {
+        // Don't let Enter submit the form early; allow newlines in textareas.
+        const tag = (e.target as HTMLElement).tagName
+        if (e.key === 'Enter' && tag !== 'TEXTAREA' && step !== last) {
+          e.preventDefault()
+        }
+      }}
+    >
       {/* Hidden inputs carry all submitted data regardless of current step */}
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="applicantName" value={name} />
@@ -225,11 +234,21 @@ export default function ApplyForm({
         </button>
 
         {step < last ? (
-          <button type="button" className="btn btn-primary" onClick={next}>
+          <button
+            key="continue-btn"
+            type="button"
+            className="btn btn-primary"
+            onClick={next}
+          >
             Continue
           </button>
         ) : (
-          <button type="submit" className="btn btn-primary" disabled={pending}>
+          <button
+            key="submit-btn"
+            type="submit"
+            className="btn btn-primary"
+            disabled={pending}
+          >
             {pending ? 'Submitting…' : 'Submit application'}
           </button>
         )}
