@@ -202,9 +202,18 @@ export default function ApplyForm({
       </div>
 
       {step === last && (
-        <p className="text-xs text-muted text-center mt-3">
-          By applying you consent to RJ&rsquo;s Coffee reviewing your responses and CV.
-        </p>
+        <div
+          className="mt-4 rounded-xl p-3.5 text-xs text-coffee leading-relaxed"
+          style={{ background: 'var(--color-cream)', border: '1px solid var(--color-line)' }}
+        >
+          <span className="font-bold text-espresso">Your data is safe with us.</span>{' '}
+          The details and CV you submit are used only to assess your application for this
+          role at RJ&rsquo;s Coffee. They are stored securely, kept confidential, and
+          shared solely with our hiring team &mdash; never sold or given to third parties.
+          You may request access to or deletion of your information at any time by
+          contacting us. By submitting, you consent to RJ&rsquo;s Coffee processing your
+          application on this basis.
+        </div>
       )}
     </form>
   )
