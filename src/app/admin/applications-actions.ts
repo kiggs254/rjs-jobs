@@ -69,6 +69,8 @@ export async function rankAction(
         summary: a.aiSummary,
         strengths: a.aiStrengths,
         concerns: a.aiConcerns,
+        // Only the typed cover letter is machine-readable; uploaded files/images are not.
+        coverLetter: a.coverNote,
       })),
     })
 

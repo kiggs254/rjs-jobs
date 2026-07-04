@@ -173,12 +173,14 @@ export interface RankInput {
     summary: string
     strengths: string[]
     concerns: string[]
+    coverLetter?: string // typed cover letter, if any
   }[]
 }
 
 export async function rankCandidates(input: RankInput): Promise<RankResult> {
   const system = `You are a hiring manager for RJ's Coffee.
 Given graded candidates for a role, rank them best-to-worst (rank 1 = best).
+Weigh each candidate's overall score and assessment, AND their cover letter when one is provided — a thoughtful, relevant, well-written cover letter is a positive signal; a generic, careless, or irrelevant one is a negative signal. Do not penalise candidates who did not include a cover letter.
 For each, set "recommend" to SHORTLIST, MAYBE, or REJECT, with a one-line "note".
 Write a short overall "summary" naming your top pick(s) and why.
 Use the exact provided applicationId values.
@@ -191,7 +193,8 @@ Respond ONLY as JSON:
         `id=${c.applicationId} | ${c.name} | score=${c.overallScore ?? 'n/a'}\n` +
         `summary: ${c.summary}\n` +
         `strengths: ${c.strengths.join('; ') || 'none'}\n` +
-        `concerns: ${c.concerns.join('; ') || 'none'}\n`,
+        `concerns: ${c.concerns.join('; ') || 'none'}\n` +
+        `cover letter: ${c.coverLetter?.trim() ? c.coverLetter.trim().slice(0, 1500) : 'none provided'}\n`,
     )
     .join('\n')
 
