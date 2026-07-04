@@ -5,11 +5,11 @@ import { getResumeDownloadUrl } from '@/lib/r2'
 
 export const runtime = 'nodejs'
 
-// GET /admin/resume/<applicationId> — admin-only. Redirects to a short-lived
-// presigned R2 URL that downloads the applicant's CV. Guarded by proxy.ts,
-// re-checked here defence-in-depth.
+// GET /admin/resume/<applicationId>?kind=cv|cover — admin-only. Redirects to a
+// short-lived presigned R2 URL that downloads the applicant's CV (default) or
+// uploaded cover letter. Guarded by proxy.ts, re-checked here defence-in-depth.
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await getSession()
@@ -18,15 +18,29 @@ export async function GET(
   }
 
   const { id } = await params
+  const kind = req.nextUrl.searchParams.get('kind') === 'cover' ? 'cover' : 'cv'
+
   const app = await prisma.application.findUnique({
     where: { id },
-    select: { resumeKey: true, resumeName: true, applicantName: true },
+    select: {
+      resumeKey: true,
+      resumeName: true,
+      coverLetterKey: true,
+      coverLetterName: true,
+      applicantName: true,
+    },
   })
-  if (!app || !app.resumeKey) {
-    return NextResponse.json({ error: 'No CV on file' }, { status: 404 })
+  if (!app) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  const key = kind === 'cover' ? app.coverLetterKey : app.resumeKey
+  const name =
+    (kind === 'cover' ? app.coverLetterName : app.resumeName) ||
+    `${app.applicantName}-${kind === 'cover' ? 'cover-letter' : 'CV'}`
+
+  if (!key) {
+    return NextResponse.json({ error: 'No file on record' }, { status: 404 })
   }
 
-  const filename = app.resumeName || `${app.applicantName}-CV`
-  const url = await getResumeDownloadUrl(app.resumeKey, filename)
+  const url = await getResumeDownloadUrl(key, name)
   return NextResponse.redirect(url)
 }

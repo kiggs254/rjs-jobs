@@ -11,9 +11,11 @@ type Q = {
   required: boolean
 }
 
-type Cv = { key: string; name: string }
+type Upload = { key: string; name: string }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const ACCEPT =
+  '.pdf,.doc,.docx,.png,.jpg,.jpeg,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg,image/webp'
 
 export default function ApplyForm({
   slug,
@@ -27,23 +29,27 @@ export default function ApplyForm({
     {},
   )
 
-  // Collected data (lives in state; mirrored into hidden inputs for submission).
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
-  const [coverNote, setCoverNote] = useState('')
   const [answers, setAnswers] = useState<Record<string, string>>({})
-  const [cv, setCv] = useState<Cv | null>(null)
+  const [cv, setCv] = useState<Upload | null>(null)
+
+  // Cover letter is optional: write text OR upload a file.
+  const [coverMode, setCoverMode] = useState<'text' | 'upload'>('text')
+  const [coverNote, setCoverNote] = useState('')
+  const [coverFile, setCoverFile] = useState<Upload | null>(null)
 
   const [step, setStep] = useState(0)
   const [error, setError] = useState('')
 
-  // Build the ordered list of steps.
+  // Order: About you → questions → CV → Cover letter → Review
   const steps = useMemo(
     () => [
       { id: 'about', title: 'About you' },
-      { id: 'cv', title: 'Your CV' },
       ...questions.map((q, i) => ({ id: q.id, title: `Question ${i + 1}`, q })),
+      { id: 'cv', title: 'Your CV' },
+      { id: 'cover', title: 'Cover letter' },
       { id: 'review', title: 'Review & submit' },
     ],
     [questions],
@@ -52,9 +58,8 @@ export default function ApplyForm({
   const pct = Math.round((step / last) * 100)
   const current = steps[step]
 
-  function setAnswer(id: string, v: string) {
+  const setAnswer = (id: string, v: string) =>
     setAnswers((a) => ({ ...a, [id]: v }))
-  }
 
   function validateStep(i: number): string {
     const s = steps[i]
@@ -69,6 +74,7 @@ export default function ApplyForm({
       if (q.required && !(answers[q.id] ?? '').trim())
         return 'Please answer this question.'
     }
+    // 'cover' is optional — no validation.
     return ''
   }
 
@@ -83,6 +89,10 @@ export default function ApplyForm({
     setStep((v) => Math.max(0, v - 1))
   }
 
+  // What actually gets submitted for the cover letter depends on the mode.
+  const submittedCoverNote = coverMode === 'text' ? coverNote : ''
+  const submittedCoverFile = coverMode === 'upload' ? coverFile : null
+
   return (
     <form action={action}>
       {/* Hidden inputs carry all submitted data regardless of current step */}
@@ -90,9 +100,11 @@ export default function ApplyForm({
       <input type="hidden" name="applicantName" value={name} />
       <input type="hidden" name="email" value={email} />
       <input type="hidden" name="phone" value={phone} />
-      <input type="hidden" name="coverNote" value={coverNote} />
       <input type="hidden" name="resumeKey" value={cv?.key ?? ''} />
       <input type="hidden" name="resumeName" value={cv?.name ?? ''} />
+      <input type="hidden" name="coverNote" value={submittedCoverNote} />
+      <input type="hidden" name="coverLetterKey" value={submittedCoverFile?.key ?? ''} />
+      <input type="hidden" name="coverLetterName" value={submittedCoverFile?.name ?? ''} />
       {questions.map((q) => (
         <input key={q.id} type="hidden" name={`q_${q.id}`} value={answers[q.id] ?? ''} />
       ))}
@@ -146,10 +158,6 @@ export default function ApplyForm({
           </div>
         )}
 
-        {current.id === 'cv' && (
-          <CvUpload cv={cv} onChange={setCv} onError={setError} />
-        )}
-
         {'q' in current && current.q && (
           <QuestionStep
             q={current.q as Q}
@@ -158,14 +166,40 @@ export default function ApplyForm({
           />
         )}
 
+        {current.id === 'cv' && (
+          <FileUpload
+            kind="cv"
+            value={cv}
+            onChange={setCv}
+            onError={setError}
+            hint="Upload your CV so our team can learn more about you."
+          />
+        )}
+
+        {current.id === 'cover' && (
+          <CoverLetterStep
+            mode={coverMode}
+            setMode={(m) => {
+              setError('')
+              setCoverMode(m)
+            }}
+            note={coverNote}
+            setNote={setCoverNote}
+            file={coverFile}
+            setFile={setCoverFile}
+            onError={setError}
+          />
+        )}
+
         {current.id === 'review' && (
           <Review
             name={name}
             email={email}
             phone={phone}
-            coverNote={coverNote}
-            setCoverNote={setCoverNote}
             cv={cv}
+            coverMode={coverMode}
+            coverNote={coverNote}
+            coverFile={coverFile}
             questions={questions}
             answers={answers}
             goTo={(id) => setStep(steps.findIndex((s) => s.id === id))}
@@ -207,12 +241,12 @@ export default function ApplyForm({
           style={{ background: 'var(--color-cream)', border: '1px solid var(--color-line)' }}
         >
           <span className="font-bold text-espresso">Your data is safe with us.</span>{' '}
-          The details and CV you submit are used only to assess your application for this
-          role at RJ&rsquo;s Coffee. They are stored securely, kept confidential, and
-          shared solely with our hiring team &mdash; never sold or given to third parties.
-          You may request access to or deletion of your information at any time by
-          contacting us. By submitting, you consent to RJ&rsquo;s Coffee processing your
-          application on this basis.
+          The details, CV, and cover letter you submit are used only to assess your
+          application for this role at RJ&rsquo;s Coffee. They are stored securely, kept
+          confidential, and shared solely with our hiring team &mdash; never sold or
+          given to third parties. You may request access to or deletion of your
+          information at any time by contacting us. By submitting, you consent to
+          RJ&rsquo;s Coffee processing your application on this basis.
         </div>
       )}
     </form>
@@ -312,14 +346,81 @@ function QuestionStep({
   )
 }
 
-function CvUpload({
-  cv,
-  onChange,
+function CoverLetterStep({
+  mode,
+  setMode,
+  note,
+  setNote,
+  file,
+  setFile,
   onError,
 }: {
-  cv: Cv | null
-  onChange: (cv: Cv | null) => void
+  mode: 'text' | 'upload'
+  setMode: (m: 'text' | 'upload') => void
+  note: string
+  setNote: (v: string) => void
+  file: Upload | null
+  setFile: (f: Upload | null) => void
   onError: (msg: string) => void
+}) {
+  return (
+    <div>
+      <p className="text-coffee mb-3">
+        Add a cover letter to tell us why you&rsquo;re a great fit.{' '}
+        <span className="text-muted">(Optional — you can skip this.)</span>
+      </p>
+
+      <div className="inline-flex rounded-lg p-1 mb-4" style={{ background: 'var(--color-cream)' }}>
+        {(['text', 'upload'] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => setMode(m)}
+            className="px-3 py-1.5 rounded-md text-sm font-semibold transition-colors"
+            style={{
+              background: mode === m ? '#fff' : 'transparent',
+              color: mode === m ? 'var(--color-brand-red)' : 'var(--color-muted)',
+              boxShadow: mode === m ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+            }}
+          >
+            {m === 'text' ? 'Write it' : 'Upload a file'}
+          </button>
+        ))}
+      </div>
+
+      {mode === 'text' ? (
+        <textarea
+          className="textarea"
+          rows={7}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Dear RJ's Coffee team, …"
+        />
+      ) : (
+        <FileUpload
+          kind="cover"
+          value={file}
+          onChange={setFile}
+          onError={onError}
+          hint="Upload your cover letter as a document or image."
+        />
+      )}
+    </div>
+  )
+}
+
+function FileUpload({
+  kind,
+  value,
+  onChange,
+  onError,
+  hint,
+}: {
+  kind: 'cv' | 'cover'
+  value: Upload | null
+  onChange: (v: Upload | null) => void
+  onError: (msg: string) => void
+  hint: string
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
@@ -331,6 +432,7 @@ function CvUpload({
     try {
       const fd = new FormData()
       fd.append('file', file)
+      fd.append('kind', kind)
       const res = await fetch('/api/upload', { method: 'POST', body: fd })
       const data = await res.json()
       if (!res.ok) {
@@ -349,13 +451,13 @@ function CvUpload({
   return (
     <div>
       <p className="text-coffee mb-3">
-        Upload your CV so our team can learn more about you. PDF or Word, up to 5&nbsp;MB.
+        {hint} PDF, Word, or image (JPG/PNG), up to 8&nbsp;MB.
       </p>
 
       <input
         ref={inputRef}
         type="file"
-        accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        accept={ACCEPT}
         className="hidden"
         onChange={(e) => {
           const f = e.target.files?.[0]
@@ -363,12 +465,12 @@ function CvUpload({
         }}
       />
 
-      {cv ? (
+      {value ? (
         <div className="card p-4 flex items-center justify-between" style={{ boxShadow: 'none' }}>
           <div className="flex items-center gap-3">
             <FileIcon />
             <div>
-              <div className="font-semibold text-espresso">{cv.name}</div>
+              <div className="font-semibold text-espresso">{value.name}</div>
               <div className="text-xs text-good font-semibold">Uploaded</div>
             </div>
           </div>
@@ -416,7 +518,9 @@ function CvUpload({
               <div className="font-semibold text-espresso">
                 Click to upload or drag &amp; drop
               </div>
-              <div className="text-xs text-muted mt-1">PDF, DOC or DOCX · max 5 MB</div>
+              <div className="text-xs text-muted mt-1">
+                PDF, DOC, DOCX, JPG, PNG or WEBP · max 8 MB
+              </div>
             </>
           )}
         </button>
@@ -429,9 +533,10 @@ function Review({
   name,
   email,
   phone,
-  coverNote,
-  setCoverNote,
   cv,
+  coverMode,
+  coverNote,
+  coverFile,
   questions,
   answers,
   goTo,
@@ -439,74 +544,68 @@ function Review({
   name: string
   email: string
   phone: string
+  cv: Upload | null
+  coverMode: 'text' | 'upload'
   coverNote: string
-  setCoverNote: (v: string) => void
-  cv: Cv | null
+  coverFile: Upload | null
   questions: Q[]
   answers: Record<string, string>
   goTo: (id: string) => void
 }) {
+  const coverSummary =
+    coverMode === 'upload'
+      ? coverFile?.name ?? 'Not added'
+      : coverNote.trim()
+        ? coverNote.trim().length > 120
+          ? coverNote.trim().slice(0, 120) + '…'
+          : coverNote.trim()
+        : 'Not added'
+
   return (
     <div className="space-y-4">
-      <div className="card p-4" style={{ boxShadow: 'none' }}>
-        <div className="flex items-center justify-between">
-          <h4 className="font-bold text-espresso">Your details</h4>
-          <button
-            type="button"
-            className="text-sm text-accent font-semibold"
-            onClick={() => goTo('about')}
-          >
-            Edit
-          </button>
-        </div>
-        <p className="text-sm text-coffee mt-1">
-          {name} · {email} · {phone}
-        </p>
-      </div>
-
-      <div className="card p-4" style={{ boxShadow: 'none' }}>
-        <div className="flex items-center justify-between">
-          <h4 className="font-bold text-espresso">CV</h4>
-          <button
-            type="button"
-            className="text-sm text-accent font-semibold"
-            onClick={() => goTo('cv')}
-          >
-            Edit
-          </button>
-        </div>
-        <p className="text-sm text-coffee mt-1">{cv?.name ?? 'Not uploaded'}</p>
-      </div>
+      <ReviewRow title="Your details" onEdit={() => goTo('about')}>
+        {name} · {email} · {phone}
+      </ReviewRow>
 
       {questions.map((q, i) => (
-        <div key={q.id} className="card p-4" style={{ boxShadow: 'none' }}>
-          <div className="flex items-center justify-between gap-3">
-            <h4 className="font-bold text-espresso text-sm">
-              {i + 1}. {q.text}
-            </h4>
-            <button
-              type="button"
-              className="text-sm text-accent font-semibold shrink-0"
-              onClick={() => goTo(q.id)}
-            >
-              Edit
-            </button>
-          </div>
-          <p className="text-sm text-coffee mt-1 whitespace-pre-wrap">
-            {answers[q.id]?.trim() || <span className="text-muted italic">No answer</span>}
-          </p>
-        </div>
+        <ReviewRow key={q.id} title={`${i + 1}. ${q.text}`} onEdit={() => goTo(q.id)}>
+          {answers[q.id]?.trim() || <span className="text-muted italic">No answer</span>}
+        </ReviewRow>
       ))}
 
-      <div className="space-y-1.5">
-        <label className="label">Anything else you&rsquo;d like us to know?</label>
-        <textarea
-          className="textarea"
-          rows={3}
-          value={coverNote}
-          onChange={(e) => setCoverNote(e.target.value)}
-        />
+      <ReviewRow title="CV" onEdit={() => goTo('cv')}>
+        {cv?.name ?? 'Not uploaded'}
+      </ReviewRow>
+
+      <ReviewRow title="Cover letter" onEdit={() => goTo('cover')}>
+        {coverSummary}
+      </ReviewRow>
+    </div>
+  )
+}
+
+function ReviewRow({
+  title,
+  onEdit,
+  children,
+}: {
+  title: string
+  onEdit: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <div className="card p-4" style={{ boxShadow: 'none' }}>
+      <div className="flex items-center justify-between gap-3">
+        <h4 className="font-bold text-espresso text-sm">{title}</h4>
+        <button
+          type="button"
+          className="text-sm text-accent font-semibold shrink-0"
+          onClick={onEdit}
+        >
+          Edit
+        </button>
       </div>
+      <p className="text-sm text-coffee mt-1 whitespace-pre-wrap">{children}</p>
     </div>
   )
 }

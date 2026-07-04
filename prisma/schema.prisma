@@ -89,12 +89,16 @@ model Application {
   applicantName String
   email         String
   phone         String
-  coverNote     String            @default("")
+  coverNote     String            @default("") // cover letter as free text (optional)
   status        ApplicationStatus @default(NEW)
 
   // CV / resume stored in Cloudflare R2 (private bucket; download via presigned URL)
   resumeKey  String @default("")
   resumeName String @default("")
+
+  // Optional cover letter uploaded as a file (alternative to coverNote text)
+  coverLetterKey  String @default("")
+  coverLetterName String @default("")
 
   // AI grading results
   overallScore Int? // 0-100 weighted score

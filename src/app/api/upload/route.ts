@@ -4,11 +4,14 @@ import { rateLimit } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 
-const MAX_BYTES = 5 * 1024 * 1024 // 5 MB
+const MAX_BYTES = 8 * 1024 * 1024 // 8 MB (phone photos of documents can be large)
 const ALLOWED: Record<string, string> = {
   'application/pdf': 'pdf',
   'application/msword': 'doc',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/webp': 'webp',
 }
 
 function jsonNoStore(body: unknown, status = 200) {
@@ -48,18 +51,20 @@ export async function POST(req: NextRequest) {
   const ext = ALLOWED[file.type]
   if (!ext) {
     return jsonNoStore(
-      { error: 'Please upload a PDF or Word document (.pdf, .doc, .docx).' },
+      { error: 'Please upload a PDF, Word document, or image (.pdf, .doc, .docx, .png, .jpg, .webp).' },
       415,
     )
   }
   if (file.size === 0) return jsonNoStore({ error: 'The file is empty.' }, 400)
   if (file.size > MAX_BYTES) {
-    return jsonNoStore({ error: 'File too large (max 5 MB).' }, 413)
+    return jsonNoStore({ error: 'File too large (max 8 MB).' }, 413)
   }
 
+  // 'cv' (default) or 'cover' — determines the storage prefix.
+  const kind = String(form.get('kind') ?? 'cv') === 'cover' ? 'covers' : 'cvs'
   const buffer = Buffer.from(await file.arrayBuffer())
-  const safeName = file.name.replace(/[^\w.\- ]+/g, '_').slice(0, 120) || `cv.${ext}`
-  const key = `cvs/${randomId()}.${ext}`
+  const safeName = file.name.replace(/[^\w.\- ]+/g, '_').slice(0, 120) || `${kind}.${ext}`
+  const key = `${kind}/${randomId()}.${ext}`
 
   try {
     await uploadResume(key, buffer, file.type)

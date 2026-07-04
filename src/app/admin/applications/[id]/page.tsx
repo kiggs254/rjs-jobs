@@ -148,10 +148,22 @@ export default async function ApplicationDetailPage({
         <div className="card p-5 text-muted text-sm">Not graded yet.</div>
       )}
 
-      {app.coverNote && (
+      {(app.coverNote || app.coverLetterKey) && (
         <div className="card p-5">
-          <h2 className="font-semibold text-espresso mb-1">Cover note</h2>
-          <p className="text-coffee whitespace-pre-wrap">{app.coverNote}</p>
+          <h2 className="font-semibold text-espresso mb-1">Cover letter</h2>
+          {app.coverNote && (
+            <p className="text-coffee whitespace-pre-wrap">{app.coverNote}</p>
+          )}
+          {app.coverLetterKey && (
+            <a
+              href={`/admin/resume/${app.id}?kind=cover`}
+              className="btn btn-dark mt-2"
+              style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+            >
+              Download cover letter
+              {app.coverLetterName ? ` (${app.coverLetterName})` : ''}
+            </a>
+          )}
         </div>
       )}
 

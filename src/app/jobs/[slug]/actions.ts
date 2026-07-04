@@ -37,13 +37,21 @@ export async function applyAction(
   const coverNote = String(formData.get('coverNote') ?? '').trim()
   const resumeKey = String(formData.get('resumeKey') ?? '').trim()
   const resumeName = String(formData.get('resumeName') ?? '').trim()
+  const coverLetterKey = String(formData.get('coverLetterKey') ?? '').trim()
+  const coverLetterName = String(formData.get('coverLetterName') ?? '').trim()
+
+  // Keys must look like ones our upload route issued (prefix + hash + allowed ext).
+  const CV_KEY_RE = /^cvs\/[a-f0-9]+\.(pdf|doc|docx|png|jpg|webp)$/
+  const COVER_KEY_RE = /^covers\/[a-f0-9]+\.(pdf|doc|docx|png|jpg|webp)$/
 
   if (!applicantName) return { error: 'Please enter your name.' }
   if (!EMAIL_RE.test(email)) return { error: 'Please enter a valid email address.' }
   if (!phone) return { error: 'Please enter your phone number.' }
-  // CV is required, and its key must look like one our upload route issued.
-  if (!resumeKey || !/^cvs\/[a-f0-9]+\.(pdf|doc|docx)$/.test(resumeKey)) {
+  if (!resumeKey || !CV_KEY_RE.test(resumeKey)) {
     return { error: 'Please upload your CV before submitting.' }
+  }
+  if (coverLetterKey && !COVER_KEY_RE.test(coverLetterKey)) {
+    return { error: 'Your cover letter upload was invalid. Please re-upload it.' }
   }
 
   // Collect + validate answers.
@@ -65,6 +73,8 @@ export async function applyAction(
       coverNote,
       resumeKey,
       resumeName,
+      coverLetterKey,
+      coverLetterName,
       status: 'NEW',
       answers: { create: answers },
     },
